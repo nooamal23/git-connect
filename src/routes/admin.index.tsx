@@ -27,6 +27,7 @@ import {
 
 import { useAutoRefresh, formatRefreshTime } from "@/hooks/use-auto-refresh";
 import { useDashboardData, type DashboardData } from "@/lib/dashboard-store";
+import { useSeasonsStore } from "@/lib/seasons-store";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
