@@ -3,7 +3,16 @@ import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
 export const getRouter = () => {
-  const queryClient = new QueryClient();
+  // Part 28/4 — automatic refresh instead of manual "تحديث" buttons.
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+        staleTime: 15_000,
+      },
+    },
+  });
 
   const router = createRouter({
     routeTree,
