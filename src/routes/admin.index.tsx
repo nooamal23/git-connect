@@ -61,6 +61,8 @@ function formatDate(iso: string) {
 
 function AdminDashboard() {
   const { data, loading, error, reload } = useDashboardData();
+  const seasons = useSeasonsStore();
+  const activeSeason = seasons.find((s) => s.isActive);
   // Part 28/4 — no manual "تحديث" button; refresh on focus + every 45s.
   const { lastRefreshedAt } = useAutoRefresh(reload, { intervalMs: 45_000 });
 
