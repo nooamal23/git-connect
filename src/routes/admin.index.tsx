@@ -27,6 +27,7 @@ import {
 
 import { useAutoRefresh, formatRefreshTime } from "@/hooks/use-auto-refresh";
 import { useDashboardData, type DashboardData } from "@/lib/dashboard-store";
+import { useSeasonsStore } from "@/lib/seasons-store";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({
@@ -60,6 +61,8 @@ function formatDate(iso: string) {
 
 function AdminDashboard() {
   const { data, loading, error, reload } = useDashboardData();
+  const seasons = useSeasonsStore();
+  const activeSeason = seasons.find((s) => s.isActive);
   // Part 28/4 — no manual "تحديث" button; refresh on focus + every 45s.
   const { lastRefreshedAt } = useAutoRefresh(reload, { intervalMs: 45_000 });
 
@@ -78,6 +81,11 @@ function AdminDashboard() {
           <p className="mt-1 text-sm text-muted-foreground">
             كل الأرقام أدناه محسوبة من بيانات الفرع الفعلية.
           </p>
+          {activeSeason && (
+            <p className="mt-1 text-sm font-medium text-gold-foreground">
+              الموسم الحالي: {activeSeason.name}
+            </p>
+          )}
         </div>
         <span className="text-xs text-muted-foreground">
           آخر تحديث: {formatRefreshTime(lastRefreshedAt)} — تحديث تلقائي
