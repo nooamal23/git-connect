@@ -75,18 +75,19 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
+      <header className="flex flex-col items-center gap-3 text-center">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">لوحة القيادة</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             كل الأرقام أدناه محسوبة من بيانات الفرع الفعلية.
           </p>
-          {activeSeason && (
-            <p className="mt-1 text-sm font-medium text-gold-foreground">
-              الموسم الحالي: {activeSeason.name}
-            </p>
-          )}
         </div>
+        {activeSeason && (
+          <p className="text-lg font-bold text-gold-foreground">
+            الموسم الحالي: {activeSeason.name}
+          </p>
+        )}
+      </header>
         <span className="text-xs text-muted-foreground">
           آخر تحديث: {formatRefreshTime(lastRefreshedAt)} — تحديث تلقائي
         </span>
