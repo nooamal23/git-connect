@@ -81,6 +81,11 @@ function AdminDashboard() {
           <p className="mt-1 text-sm text-muted-foreground">
             كل الأرقام أدناه محسوبة من بيانات الفرع الفعلية.
           </p>
+          {activeSeason && (
+            <p className="mt-1 text-sm font-medium text-gold-foreground">
+              الموسم الحالي: {activeSeason.name}
+            </p>
+          )}
         </div>
         <span className="text-xs text-muted-foreground">
           آخر تحديث: {formatRefreshTime(lastRefreshedAt)} — تحديث تلقائي
