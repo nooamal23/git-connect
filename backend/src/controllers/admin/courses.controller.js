@@ -9,7 +9,7 @@ const courseSchema = z.object({
   title: z.string().min(2),
   category: z.enum(["children", "women", "men", "training", "summer"]),
   type: z.enum(["quran", "fiqh", "training", "summer"]).optional(),
-  level: z.string().min(1),
+  level: z.string().min(1).optional(),
   capacity: z.number().int().positive().default(25),
   instructorId: z.string().uuid().nullable().optional(),
   seasonId: z.number().int().nullable().optional(),
@@ -88,8 +88,19 @@ async function seasonRangeError({ seasonId, startDate, endDate }) {
 export async function create(req, res, next) {
   try {
     const c = courseSchema.parse(req.body);
+    // Part 48: a new course is always attached to the currently active season.
+    const activeSeason = await prisma.season.findFirst({
+      where: { isActive: true },
+      select: { id: true },
+    });
+    if (!activeSeason) {
+      return res.status(409).json({
+        error: "لا يوجد موسم دراسي نشط حالياً — يرجى تفعيل موسم من صفحة المواسم الدراسية أولاً.",
+      });
+    }
+    const seasonId = activeSeason.id;
     const rangeError = await seasonRangeError({
-      seasonId: c.seasonId ?? null,
+      seasonId,
       startDate: c.startDate ?? null,
       endDate: c.endDate ?? null,
     });
@@ -106,9 +117,10 @@ export async function create(req, res, next) {
         title: c.title,
         category: c.category,
         type: c.type ?? "quran",
-        level: c.level,
+        level: c.level ?? "all",
         capacity: c.capacity,
-        seasonId: c.seasonId ?? null,
+        seasonId,
+
         isPublished: c.isPublished ?? true,
         startDate: c.startDate ? new Date(c.startDate) : null,
         endDate: c.endDate ? new Date(c.endDate) : null,

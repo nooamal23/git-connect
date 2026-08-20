@@ -22,7 +22,6 @@ import {
   AUDIENCE_LABEL,
   ALLOWED_AUDIENCE,
   type CourseLite,
-  type CourseLevel,
   type CourseType,
   type CourseAudience,
 } from "@/lib/people-store";
@@ -36,25 +35,18 @@ type FormState = {
   title: string;
   type: CourseType;
   audience: CourseAudience;
-  level: CourseLevel;
   startDate: string;
   endDate: string;
-  instructorId: string;
-  capacity: number;
-  seasonId: number | null;
 };
 
 const EMPTY_FORM: FormState = {
   title: "",
   type: "quran",
   audience: "children",
-  level: "beginner",
   startDate: "",
   endDate: "",
-  instructorId: "",
-  capacity: 25,
-  seasonId: null,
 };
+
 
 
 function CoursesAdminPage() {
@@ -87,7 +79,7 @@ function CoursesAdminPage() {
 
   function openAdd() {
     setEditing(null);
-    setForm({ ...EMPTY_FORM, seasonId: seasons.find((s) => s.isActive)?.id ?? null });
+    setForm({ ...EMPTY_FORM });
     setOpen(true);
   }
 
@@ -97,12 +89,8 @@ function CoursesAdminPage() {
       title: c.title,
       type: c.type ?? "quran",
       audience: c.audience ?? "children",
-      level: c.level ?? "beginner",
       startDate: c.startDate ?? "",
       endDate: c.endDate ?? "",
-      instructorId: c.instructorId ?? "",
-      capacity: c.capacity ?? 25,
-      seasonId: c.seasonId ?? null,
     });
     setOpen(true);
   }
@@ -128,17 +116,22 @@ function CoursesAdminPage() {
       });
       return;
     }
+    if (!editing && !seasons.some((s) => s.isActive)) {
+      noticeToast({
+        variant: "warning",
+        title: "تعذّر إنشاء الدورة",
+        message: "لا يوجد موسم دراسي نشط حالياً — يرجى تفعيل موسم من صفحة المواسم الدراسية أولاً.",
+      });
+      return;
+    }
     const payload = {
       title: form.title,
       type: form.type,
       audience: form.audience,
-      level: form.level,
       startDate: form.startDate,
       endDate: form.endDate,
-      instructorId: form.instructorId || undefined,
-      capacity: Number(form.capacity) || 25,
-      seasonId: form.seasonId,
     };
+
     // A rejected validation (e.g. course dates outside the season range) must
     // leave the dialog open with the admin's values intact — the large notice
     // is shown on top and only the offending field needs fixing.
@@ -337,78 +330,13 @@ function CoursesAdminPage() {
                 </select>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm font-semibold">المستوى</label>
-                <select
-                  value={form.level}
-                  onChange={(e) => setForm({ ...form, level: e.target.value as CourseLevel })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                >
-                  {Object.entries(LEVEL_LABEL).map(([k, v]) => (
-                    <option key={k} value={k}>{v}</option>
-                  ))}
-                </select>
-              </div>
-
               <Field label="تاريخ البداية" type="date" value={form.startDate} onChange={(v) => setForm({ ...form, startDate: v })} required />
               <Field label="تاريخ النهاية" type="date" value={form.endDate} onChange={(v) => setForm({ ...form, endDate: v })} required />
 
               <div className="sm:col-span-2 rounded-lg border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-                الأيام والتوقيت تُحدَّد على مستوى الفوج وليس الدورة — أضفها من «المستويات والمجموعات» عند إنشاء/تعديل الفوج.
+                المستوى والمعلم والطاقة الاستيعابية والأيام والتوقيت تُحدَّد على مستوى الفوج وليس الدورة — أضفها من «المستويات والمجموعات» عند إنشاء/تعديل الفوج. كما تُربط الدورة تلقائياً بالموسم الدراسي النشط.
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">المعلم المسؤول</label>
-                <select
-                  value={form.instructorId}
-                  onChange={(e) => setForm({ ...form, instructorId: e.target.value })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                >
-                  <option value="">— اختر معلما —</option>
-                  {instructors.map((i) => (
-                    <option key={i.id} value={i.id}>{i.fullName}</option>
-                  ))}
-                </select>
-                {instructors.length === 0 && (
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    لا يوجد معلمون بعد. أضف معلمين من قسم "المعلمون".
-                  </div>
-                )}
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm font-semibold">الموسم الدراسي</label>
-                <select
-                  value={form.seasonId ?? ""}
-                  onChange={(e) => setForm({ ...form, seasonId: e.target.value ? Number(e.target.value) : null })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                >
-                  <option value="">— بدون موسم —</option>
-                  {seasons.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}{s.isActive ? " (نشط)" : ""}
-                    </option>
-                  ))}
-                </select>
-                {seasons.length === 0 && (
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    لا توجد مواسم بعد. أنشئها من قسم "المواسم الدراسية".
-                  </div>
-                )}
-              </div>
-
-
-
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">الطاقة الاستيعابية</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={form.capacity}
-                  onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                />
-              </div>
 
               <button
                 type="submit"
