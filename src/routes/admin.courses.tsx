@@ -36,25 +36,18 @@ type FormState = {
   title: string;
   type: CourseType;
   audience: CourseAudience;
-  level: CourseLevel;
   startDate: string;
   endDate: string;
-  instructorId: string;
-  capacity: number;
-  seasonId: number | null;
 };
 
 const EMPTY_FORM: FormState = {
   title: "",
   type: "quran",
   audience: "children",
-  level: "beginner",
   startDate: "",
   endDate: "",
-  instructorId: "",
-  capacity: 25,
-  seasonId: null,
 };
+
 
 
 function CoursesAdminPage() {
