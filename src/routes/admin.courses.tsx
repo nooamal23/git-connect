@@ -22,7 +22,6 @@ import {
   AUDIENCE_LABEL,
   ALLOWED_AUDIENCE,
   type CourseLite,
-  type CourseLevel,
   type CourseType,
   type CourseAudience,
 } from "@/lib/people-store";
