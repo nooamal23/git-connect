@@ -88,8 +88,19 @@ async function seasonRangeError({ seasonId, startDate, endDate }) {
 export async function create(req, res, next) {
   try {
     const c = courseSchema.parse(req.body);
+    // Part 48: a new course is always attached to the currently active season.
+    const activeSeason = await prisma.season.findFirst({
+      where: { isActive: true },
+      select: { id: true },
+    });
+    if (!activeSeason) {
+      return res.status(409).json({
+        error: "لا يوجد موسم دراسي نشط حالياً — يرجى تفعيل موسم من صفحة المواسم الدراسية أولاً.",
+      });
+    }
+    const seasonId = activeSeason.id;
     const rangeError = await seasonRangeError({
-      seasonId: c.seasonId ?? null,
+      seasonId,
       startDate: c.startDate ?? null,
       endDate: c.endDate ?? null,
     });
@@ -106,9 +117,10 @@ export async function create(req, res, next) {
         title: c.title,
         category: c.category,
         type: c.type ?? "quran",
-        level: c.level,
+        level: c.level ?? "all",
         capacity: c.capacity,
-        seasonId: c.seasonId ?? null,
+        seasonId,
+
         isPublished: c.isPublished ?? true,
         startDate: c.startDate ? new Date(c.startDate) : null,
         endDate: c.endDate ? new Date(c.endDate) : null,
