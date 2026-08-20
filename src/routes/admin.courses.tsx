@@ -337,78 +337,13 @@ function CoursesAdminPage() {
                 </select>
               </div>
 
-              <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm font-semibold">المستوى</label>
-                <select
-                  value={form.level}
-                  onChange={(e) => setForm({ ...form, level: e.target.value as CourseLevel })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                >
-                  {Object.entries(LEVEL_LABEL).map(([k, v]) => (
-                    <option key={k} value={k}>{v}</option>
-                  ))}
-                </select>
-              </div>
-
               <Field label="تاريخ البداية" type="date" value={form.startDate} onChange={(v) => setForm({ ...form, startDate: v })} required />
               <Field label="تاريخ النهاية" type="date" value={form.endDate} onChange={(v) => setForm({ ...form, endDate: v })} required />
 
               <div className="sm:col-span-2 rounded-lg border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-                الأيام والتوقيت تُحدَّد على مستوى الفوج وليس الدورة — أضفها من «المستويات والمجموعات» عند إنشاء/تعديل الفوج.
+                المستوى والمعلم والطاقة الاستيعابية والأيام والتوقيت تُحدَّد على مستوى الفوج وليس الدورة — أضفها من «المستويات والمجموعات» عند إنشاء/تعديل الفوج. كما تُربط الدورة تلقائياً بالموسم الدراسي النشط.
               </div>
 
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">المعلم المسؤول</label>
-                <select
-                  value={form.instructorId}
-                  onChange={(e) => setForm({ ...form, instructorId: e.target.value })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                >
-                  <option value="">— اختر معلما —</option>
-                  {instructors.map((i) => (
-                    <option key={i.id} value={i.id}>{i.fullName}</option>
-                  ))}
-                </select>
-                {instructors.length === 0 && (
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    لا يوجد معلمون بعد. أضف معلمين من قسم "المعلمون".
-                  </div>
-                )}
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm font-semibold">الموسم الدراسي</label>
-                <select
-                  value={form.seasonId ?? ""}
-                  onChange={(e) => setForm({ ...form, seasonId: e.target.value ? Number(e.target.value) : null })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                >
-                  <option value="">— بدون موسم —</option>
-                  {seasons.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}{s.isActive ? " (نشط)" : ""}
-                    </option>
-                  ))}
-                </select>
-                {seasons.length === 0 && (
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    لا توجد مواسم بعد. أنشئها من قسم "المواسم الدراسية".
-                  </div>
-                )}
-              </div>
-
-
-
-              <div>
-                <label className="mb-1.5 block text-sm font-semibold">الطاقة الاستيعابية</label>
-                <input
-                  type="number"
-                  min={1}
-                  value={form.capacity}
-                  onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm"
-                />
-              </div>
 
               <button
                 type="submit"
