@@ -9,7 +9,7 @@ const courseSchema = z.object({
   title: z.string().min(2),
   category: z.enum(["children", "women", "men", "training", "summer"]),
   type: z.enum(["quran", "fiqh", "training", "summer"]).optional(),
-  level: z.string().min(1),
+  level: z.string().min(1).optional(),
   capacity: z.number().int().positive().default(25),
   instructorId: z.string().uuid().nullable().optional(),
   seasonId: z.number().int().nullable().optional(),
