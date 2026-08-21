@@ -46,6 +46,27 @@ async function deactivateOthers(tx, exceptId = null) {
   });
 }
 
+// Part 51: no two seasons may have overlapping date ranges.
+// Ranges [s1,e1] and [s2,e2] overlap when s1 < e2 AND s2 < e1 (strict, so a
+// season starting exactly on the day another ends is allowed).
+async function assertNoOverlap(tx, { startsOn, endsOn }, exceptId = null) {
+  const conflict = await tx.season.findFirst({
+    where: {
+      ...(exceptId === null ? {} : { NOT: { id: exceptId } }),
+      startsOn: { lt: endsOn },
+      endsOn: { gt: startsOn },
+    },
+    orderBy: { startsOn: "asc" },
+  });
+  if (conflict) {
+    const err = new Error(
+      `تتداخل تواريخ هذا الموسم مع موسم آخر موجود (الموسم «${conflict.name}»: من ${iso(conflict.startsOn)} إلى ${iso(conflict.endsOn)}). يرجى اختيار تواريخ لا تتداخل مع أي موسم موجود.`,
+    );
+    err.status = 409;
+    throw err;
+  }
+}
+
 export async function list(_req, res, next) {
   try {
     const rows = await prisma.season.findMany({
