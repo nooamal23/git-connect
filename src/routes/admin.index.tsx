@@ -75,24 +75,30 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <header className="grid grid-cols-3 items-center gap-4">
-        <div className="text-start">
-          <h1 className="font-display text-2xl font-bold text-foreground">لوحة القيادة</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            كل الأرقام أدناه محسوبة من بيانات الفرع الفعلية.
-          </p>
-        </div>
+      <header className="space-y-6">
         <div className="text-center">
-          {activeSeason && (
-            <p className="font-display text-xl font-bold text-gold-foreground">
+          {activeSeason ? (
+            <h1 className="font-display text-3xl font-bold text-gold-foreground">
               {activeSeason.name}
-            </p>
+            </h1>
+          ) : (
+            <h1 className="font-display text-3xl font-bold text-muted-foreground">—</h1>
           )}
         </div>
-        <div className="text-end">
-          <span className="text-xs text-muted-foreground">
-            آخر تحديث: {formatRefreshTime(lastRefreshedAt)} — تحديث تلقائي
-          </span>
+
+        <div className="grid grid-cols-3 items-center gap-4">
+          <div className="text-start">
+            <h2 className="font-display text-2xl font-bold text-foreground">لوحة القيادة</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              كل الأرقام أدناه محسوبة من بيانات الفرع الفعلية.
+            </p>
+          </div>
+          <div />
+          <div className="text-end">
+            <span className="text-xs text-muted-foreground">
+              آخر تحديث: {formatRefreshTime(lastRefreshedAt)} — تحديث تلقائي
+            </span>
+          </div>
         </div>
       </header>
 
