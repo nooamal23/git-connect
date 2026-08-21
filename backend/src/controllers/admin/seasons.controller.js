@@ -81,6 +81,7 @@ export async function create(req, res, next) {
   try {
     const s = seasonSchema.parse(req.body);
     const row = await prisma.$transaction(async (tx) => {
+      await assertNoOverlap(tx, { startsOn: new Date(s.startsOn), endsOn: new Date(s.endsOn) });
       if (s.isActive) await deactivateOthers(tx);
       return tx.season.create({
       data: {
