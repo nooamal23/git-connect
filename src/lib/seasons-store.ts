@@ -93,7 +93,7 @@ export const seasonsActions = {
         body: JSON.stringify(input),
       });
     } catch (e) {
-      await toastError(`تعذّر إنشاء الموسم: ${(e as Error).message}`);
+      await toastError((e as Error).message);
       throw e;
     }
     await ensureSeasonsLoaded(true);
