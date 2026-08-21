@@ -81,8 +81,8 @@ export function getActiveSeason(): Season | undefined {
 }
 
 async function toastError(msg: string) {
-  const { toast } = await import("sonner");
-  toast.error(msg);
+  const { noticeToast } = await import("./notice-toast");
+  noticeToast({ variant: "error", title: "تعذّر حفظ الموسم", message: msg });
 }
 
 export const seasonsActions = {
@@ -93,7 +93,7 @@ export const seasonsActions = {
         body: JSON.stringify(input),
       });
     } catch (e) {
-      await toastError(`تعذّر إنشاء الموسم: ${(e as Error).message}`);
+      await toastError((e as Error).message);
       throw e;
     }
     await ensureSeasonsLoaded(true);
@@ -105,7 +105,8 @@ export const seasonsActions = {
         body: JSON.stringify(patch),
       });
     } catch (e) {
-      await toastError(`تعذّر تحديث الموسم: ${(e as Error).message}`);
+      await toastError((e as Error).message);
+      throw e;
     }
     await ensureSeasonsLoaded(true);
   },

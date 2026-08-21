@@ -46,6 +46,27 @@ async function deactivateOthers(tx, exceptId = null) {
   });
 }
 
+// Part 51: no two seasons may have overlapping date ranges.
+// Ranges [s1,e1] and [s2,e2] overlap when s1 < e2 AND s2 < e1 (strict, so a
+// season starting exactly on the day another ends is allowed).
+async function assertNoOverlap(tx, { startsOn, endsOn }, exceptId = null) {
+  const conflict = await tx.season.findFirst({
+    where: {
+      ...(exceptId === null ? {} : { NOT: { id: exceptId } }),
+      startsOn: { lt: endsOn },
+      endsOn: { gt: startsOn },
+    },
+    orderBy: { startsOn: "asc" },
+  });
+  if (conflict) {
+    const err = new Error(
+      `تتداخل تواريخ هذا الموسم مع موسم آخر موجود (الموسم «${conflict.name}»: من ${iso(conflict.startsOn)} إلى ${iso(conflict.endsOn)}). يرجى اختيار تواريخ لا تتداخل مع أي موسم موجود.`,
+    );
+    err.status = 409;
+    throw err;
+  }
+}
+
 export async function list(_req, res, next) {
   try {
     const rows = await prisma.season.findMany({
@@ -60,6 +81,7 @@ export async function create(req, res, next) {
   try {
     const s = seasonSchema.parse(req.body);
     const row = await prisma.$transaction(async (tx) => {
+      await assertNoOverlap(tx, { startsOn: new Date(s.startsOn), endsOn: new Date(s.endsOn) });
       if (s.isActive) await deactivateOthers(tx);
       return tx.season.create({
       data: {
@@ -87,6 +109,15 @@ export async function update(req, res, next) {
       if (patch[k] !== undefined) data[k] = new Date(patch[k]);
     }
     const row = await prisma.$transaction(async (tx) => {
+      if (data.startsOn !== undefined || data.endsOn !== undefined) {
+        const current = await tx.season.findUnique({ where: { id } });
+        if (!current) { const e = new Error("الموسم غير موجود"); e.status = 404; throw e; }
+        await assertNoOverlap(
+          tx,
+          { startsOn: data.startsOn ?? current.startsOn, endsOn: data.endsOn ?? current.endsOn },
+          id,
+        );
+      }
       if (patch.isActive) await deactivateOthers(tx, id);
       return tx.season.update({ where: { id }, data, include: INCLUDE });
     });
