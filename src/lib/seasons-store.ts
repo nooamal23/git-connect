@@ -81,8 +81,8 @@ export function getActiveSeason(): Season | undefined {
 }
 
 async function toastError(msg: string) {
-  const { toast } = await import("sonner");
-  toast.error(msg);
+  const { noticeToast } = await import("./notice-toast");
+  noticeToast({ variant: "error", title: "تعذّر حفظ الموسم", message: msg });
 }
 
 export const seasonsActions = {
