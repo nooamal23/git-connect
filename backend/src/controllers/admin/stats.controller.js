@@ -45,12 +45,13 @@ function isoDay(d) {
  *  or when it has no dates at all but is published. */
 function activeCourseWhere(todayIso) {
   const today = new Date(`${todayIso}T00:00:00.000Z`);
+  // Part 50 — "active" means the course has not finished yet. Courses whose
+  // period starts later this season still count as active (they are running
+  // programmes), and undated courses count when published.
   return {
     OR: [
-      { startDate: { lte: today }, endDate: { gte: today } },
-      { startDate: { lte: today }, endDate: null },
-      { startDate: null, endDate: { gte: today } },
-      { startDate: null, endDate: null, isPublished: true },
+      { endDate: { gte: today } },
+      { endDate: null, isPublished: true },
     ],
   };
 }
@@ -70,7 +71,7 @@ export async function dashboard(_req, res, next) {
       upcomingNews,
       upcomingCompetitions,
       attendanceRows,
-      enrollmentRows,
+      newStudentRows,
       memorizationRows,
       quranEnrollments,
       latestGroups,
@@ -98,10 +99,13 @@ export async function dashboard(_req, res, next) {
         FROM attendance
         WHERE session_date BETWEEN ${from}::date AND ${today}::date
         GROUP BY session_date`,
+      // Part 50 — new students come from the users table only: a student's
+      // registration date is what matters, not enrollments or course types.
       prisma.$queryRaw`
-        SELECT (enrolled_at AT TIME ZONE 'UTC')::date::text AS day, COUNT(*)::int AS total
-        FROM enrollments
-        WHERE (enrolled_at AT TIME ZONE 'UTC')::date BETWEEN ${from}::date AND ${today}::date
+        SELECT (created_at AT TIME ZONE 'UTC')::date::text AS day, COUNT(*)::int AS total
+        FROM users
+        WHERE role = 'student'
+          AND (created_at AT TIME ZONE 'UTC')::date BETWEEN ${from}::date AND ${today}::date
         GROUP BY 1`,
       prisma.$queryRaw`
         SELECT logged_on::text AS day, COUNT(*)::int AS total
@@ -132,7 +136,7 @@ export async function dashboard(_req, res, next) {
 
     // --- 7-day series -------------------------------------------------------
     const attMap = new Map(attendanceRows.map((r) => [r.day, r]));
-    const enrMap = new Map(enrollmentRows.map((r) => [r.day, Number(r.total)]));
+    const newStudentMap = new Map(newStudentRows.map((r) => [r.day, Number(r.total)]));
     const memMap = new Map(memorizationRows.map((r) => [r.day, Number(r.total)]));
     const series = [];
     for (let i = 0; i < 7; i += 1) {
@@ -143,7 +147,7 @@ export async function dashboard(_req, res, next) {
         day,
         attendanceRate: total > 0 ? Math.round((Number(att.present) / total) * 100) : 0,
         attendanceRecorded: total,
-        newEnrollments: enrMap.get(day) ?? 0,
+        newStudents: newStudentMap.get(day) ?? 0,
         memorized: memMap.get(day) ?? 0,
       });
     }

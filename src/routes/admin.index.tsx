@@ -167,7 +167,7 @@ function StudentsChart({ data, className }: { data: DashboardData | null; classN
     () => (data?.series ?? []).map((p) => ({ ...p, label: dayLabel(p.day) })),
     [data],
   );
-  const hasAny = rows.some((r) => r.attendanceRecorded > 0 || r.newEnrollments > 0 || r.memorized > 0);
+  const hasAny = rows.some((r) => r.attendanceRecorded > 0 || r.newStudents > 0 || r.memorized > 0);
 
   return (
     <Panel title="إحصائيات الطلاب — آخر 7 أيام" icon={BookOpen} className={className}>
@@ -185,7 +185,7 @@ function StudentsChart({ data, className }: { data: DashboardData | null; classN
               />
               <Legend wrapperStyle={{ direction: "rtl", fontSize: 12 }} />
               <Line type="monotone" dataKey="attendanceRate" name="الحضور (%)" stroke="var(--primary)" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="newEnrollments" name="الملتحقون الجدد" stroke="var(--gold)" strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="newStudents" name="المنتسبون الجدد" stroke="var(--gold)" strokeWidth={2} dot={{ r: 3 }} />
               <Line type="monotone" dataKey="memorized" name="المحفوظ (أحزاب)" stroke="var(--destructive)" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
