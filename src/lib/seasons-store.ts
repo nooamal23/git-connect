@@ -105,7 +105,8 @@ export const seasonsActions = {
         body: JSON.stringify(patch),
       });
     } catch (e) {
-      await toastError(`تعذّر تحديث الموسم: ${(e as Error).message}`);
+      await toastError((e as Error).message);
+      throw e;
     }
     await ensureSeasonsLoaded(true);
   },
