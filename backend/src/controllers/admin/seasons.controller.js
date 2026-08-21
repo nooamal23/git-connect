@@ -109,6 +109,15 @@ export async function update(req, res, next) {
       if (patch[k] !== undefined) data[k] = new Date(patch[k]);
     }
     const row = await prisma.$transaction(async (tx) => {
+      if (data.startsOn !== undefined || data.endsOn !== undefined) {
+        const current = await tx.season.findUnique({ where: { id } });
+        if (!current) { const e = new Error("الموسم غير موجود"); e.status = 404; throw e; }
+        await assertNoOverlap(
+          tx,
+          { startsOn: data.startsOn ?? current.startsOn, endsOn: data.endsOn ?? current.endsOn },
+          id,
+        );
+      }
       if (patch.isActive) await deactivateOthers(tx, id);
       return tx.season.update({ where: { id }, data, include: INCLUDE });
     });
