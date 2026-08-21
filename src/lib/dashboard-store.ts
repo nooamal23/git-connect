@@ -16,7 +16,7 @@ export type DashboardSeriesPoint = {
   day: string;
   attendanceRate: number;
   attendanceRecorded: number;
-  newEnrollments: number;
+  newStudents: number;
   memorized: number;
 };
 
