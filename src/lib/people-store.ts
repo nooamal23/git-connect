@@ -87,6 +87,8 @@ export type Person = {
   memberId?: string | null;
   /** Part 36 — registration date (server `createdAt`), display only. */
   createdAt?: string | null;
+  /** Part 52 — account status coming from the backend `is_active` column. */
+  isActive?: boolean;
   fullName: string;
   username: string;
   password: string;
@@ -221,6 +223,7 @@ export async function ensurePeopleLoaded(force = false): Promise<void> {
           role: u.role,
           memberId: u.memberId ?? null,
           createdAt: u.createdAt ?? null,
+          isActive: u.isActive ?? true,
           fullName: u.fullName,
           username: u.username,
           password: "", // never returned by the API
